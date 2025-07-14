@@ -14,8 +14,11 @@ resource "aws_lambda_function" "lambda" {
   environment {
     variables = var.environment_variables
   }
+
+   # ✅ Suporte a Lambda Layer
+  layers = var.lambda_layer_arn != null ? [var.lambda_layer_arn] : null
   
-  # NOVO: Preconditions para garantir a lógica de SQS condicional
+  #Preconditions para garantir a lógica de SQS condicional
   lifecycle {
     precondition {
       # Validação de mutualidade exclusiva: create_sqs_queue e use_existing_sqs_trigger não podem ser true ao mesmo tempo.

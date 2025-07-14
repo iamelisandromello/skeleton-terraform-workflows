@@ -38,9 +38,14 @@ variable "existing_sqs_queue_arn" {
   default     = ""
 }
 
-# NOVO: Variável para o nome da fila SQS existente (passada do módulo raiz)
 variable "existing_sqs_queue_name" {
   description = "Nome da fila SQS existente se usada como trigger (para uso em preconditions e logging)."
   type        = string
   default     = ""
+}
+
+variable "lambda_layer_arn" {
+description = "ARN da Lambda Layer a ser anexada à função Lambda (opcional)."
+type        = string
+default     = null
 }
