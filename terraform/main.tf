@@ -44,6 +44,8 @@ module "lambda" {
   s3_bucket             = data.aws_s3_bucket.lambda_code_bucket.bucket
   s3_key                = local.s3_object_key
   environment_variables = local.merged_env_vars
+  project_name          = var.project_name
+  environment           = var.environment
   
   # Passando as variáveis de controle SQS e o ARN da fila EXISTENTE (agora resolvido por data source)
   create_sqs_queue           = var.create_sqs_queue
