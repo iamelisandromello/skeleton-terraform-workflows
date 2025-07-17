@@ -19,6 +19,16 @@ variable "runtime" {
   type = string
 }
 
+variable "project_name" {
+  description = "Nome do projeto."
+  type        = string
+}
+
+variable "environment" {
+  description = "Ambiente de implantação."
+  type        = string
+}
+
 # Variáveis passadas do módulo raiz para a Lambda para preconditions
 variable "create_sqs_queue" {
   description = "Define se uma nova fila SQS será criada (para uso em preconditions)."
