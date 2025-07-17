@@ -76,3 +76,34 @@ variable "existing_sqs_queue_name" {
   type        = string
   default     = "" # Padrão vazio
 }
+
+# --- VARIÁVEIS DE ENTRADA DO MÓDULO RAIZ (VPC, SUBNET, SG, TIMEOUT, MEMORY) ---
+variable "lambda_vpc_id" {
+  description = "O ID da VPC para a função Lambda. Opcional. Se fornecido, subnets e security groups também devem ser."
+  type        = string
+  default     = ""
+}
+
+variable "lambda_subnet_ids" {
+  description = "Uma lista de IDs de subnets para a função Lambda. Opcional. Requer 'lambda_vpc_id'."
+  type        = list(string)
+  default     = []
+}
+
+variable "lambda_security_group_ids" {
+  description = "Uma lista de IDs de Security Groups para a função Lambda. Opcional. Requer 'lambda_vpc_id'."
+  type        = list(string)
+  default     = []
+}
+
+variable "lambda_timeout" {
+  description = "O tempo limite de execução da Lambda em segundos."
+  type        = number
+  default     = 30
+}
+
+variable "lambda_memory" {
+  description = "A quantidade de memória em MB que sua função Lambda terá acesso."
+  type        = number
+  default     = 128
+}

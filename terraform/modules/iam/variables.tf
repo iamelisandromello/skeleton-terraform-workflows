@@ -43,8 +43,15 @@ variable "existing_sqs_queue_arn" {
   default     = "" # Padrão vazio
 }
 
-# NOVO: Nome da política IAM para consumo de SQS
+# Nome da política IAM para consumo de SQS
 variable "consume_policy_name" {
   description = "Nome da política IAM para consumo de SQS."
   type        = string
+}
+
+# --- Variável para controlar a associação da política de acesso à VPC ---
+variable "associate_vpc_policy" {
+  description = "Define se a política 'AWSLambdaVPCAccessExecutionRole' deve ser anexada ao IAM Role da Lambda."
+  type        = bool
+  default     = false
 }
