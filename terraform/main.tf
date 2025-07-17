@@ -20,7 +20,7 @@ data "aws_s3_bucket" "lambda_code_bucket" {
   bucket = var.s3_bucket_name
 }
 
-# NOVO: Data source para obter o ARN da fila SQS existente a partir do NOME
+# Data source para obter o ARN da fila SQS existente a partir do NOME
 # Este bloco será avaliado SOMENTE se 'use_existing_sqs_trigger' for true e 'existing_sqs_queue_name' for fornecido.
 # O ARN resolvido será então passado para outros recursos.
 data "aws_sqs_queue" "existing_trigger_queue" {
@@ -30,28 +30,34 @@ data "aws_sqs_queue" "existing_trigger_queue" {
 
 # Módulo SQS é criado SOMENTE se 'create_sqs_queue' for true E 'use_existing_sqs_trigger' for false
 module "sqs" {
-  source     = "./modules/sqs"
-  count      = var.create_sqs_queue && !var.use_existing_sqs_trigger ? 1 : 0
-  queue_name = local.queue_name
+  source       = "./modules/sqs"
+  count        = var.create_sqs_queue && !var.use_existing_sqs_trigger ? 1 : 0
+  queue_name   = local.queue_name
 }
 
 module "lambda" {
-  source              = "./modules/lambda"
-  lambda_name         = local.lambda_name
-  role_arn            = module.iam.role_arn
-  handler             = local.lambda_handler
-  runtime             = local.lambda_runtime
-  s3_bucket           = data.aws_s3_bucket.lambda_code_bucket.bucket
-  s3_key              = local.s3_object_key
+  source                = "./modules/lambda"
+  lambda_name           = local.lambda_name
+  role_arn              = module.iam.role_arn
+  handler               = local.lambda_handler
+  runtime               = local.lambda_runtime
+  s3_bucket             = data.aws_s3_bucket.lambda_code_bucket.bucket
+  s3_key                = local.s3_object_key
   environment_variables = local.merged_env_vars
   
   # Passando as variáveis de controle SQS e o ARN da fila EXISTENTE (agora resolvido por data source)
-  create_sqs_queue         = var.create_sqs_queue
-  use_existing_sqs_trigger = var.use_existing_sqs_trigger
+  create_sqs_queue           = var.create_sqs_queue
+  use_existing_sqs_trigger   = var.use_existing_sqs_trigger
   # O ARN passado para o módulo lambda agora vem do data source
-  existing_sqs_queue_arn   = var.use_existing_sqs_trigger && var.existing_sqs_queue_name != "" ? data.aws_sqs_queue.existing_trigger_queue[0].arn : ""
+  existing_sqs_queue_arn     = var.use_existing_sqs_trigger && var.existing_sqs_queue_name != "" ? data.aws_sqs_queue.existing_trigger_queue[0].arn : ""
   # O NOME da fila também pode ser passado para consistência, se o módulo lambda precisar
-  existing_sqs_queue_name  = var.existing_sqs_queue_name # NOVO: Passa o nome da fila existente
+  existing_sqs_queue_name    = var.existing_sqs_queue_name # NOVO: Passa o nome da fila existente
+
+  vpc_id                     = var.lambda_vpc_id
+  subnet_ids                 = var.lambda_subnet_ids
+  security_group_ids         = var.lambda_security_group_ids
+  timeout                    = var.lambda_timeout
+  memory_size                = var.lambda_memory
 }
 
 module "iam" {
@@ -70,11 +76,12 @@ module "iam" {
   use_existing_sqs_trigger = var.use_existing_sqs_trigger
   # O ARN passado para o módulo IAM agora vem do data source
   existing_sqs_queue_arn   = var.use_existing_sqs_trigger && var.existing_sqs_queue_name != "" ? data.aws_sqs_queue.existing_trigger_queue[0].arn : ""
-  consume_policy_name      = local.consume_policy_name 
+  consume_policy_name      = local.consume_policy_name
+  associate_vpc_policy     = var.lambda_vpc_id != ""
 }
 
 module "cloudwatch" {
-  source         = "./modules/cloudwatch"
+  source       = "./modules/cloudwatch"
   log_group_name = local.log_group_name
 }
 

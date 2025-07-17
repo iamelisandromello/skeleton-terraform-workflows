@@ -72,3 +72,12 @@ resource "aws_iam_role_policy" "lambda_sqs_consume" {
     ]
   })
 }
+
+# --- Anexar a política gerenciada para acesso à VPC ---
+# Este attachment será criado (count = 1) SOMENTE se 'associate_vpc_policy' for true.
+# Isso garante que a Lambda tenha as permissões necessárias para operar dentro de uma VPC.
+resource "aws_iam_role_policy_attachment" "lambda_vpc_access" {
+  count      = var.associate_vpc_policy ? 1 : 0
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
